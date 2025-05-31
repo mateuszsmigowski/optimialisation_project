@@ -2,27 +2,29 @@ import numpy as np
 from utility.product import Product
 
 class Shelf:
+    
+    ## - Static properties
+    voxel_size: float = 0.1
+    shelf_dimensions: tuple[float, float, float] = (5.0, 0.51, 0.51)
+    grid_dimension: tuple[int, int, int] = (
+            int(shelf_dimensions[0] // voxel_size),
+            int(shelf_dimensions[1] // voxel_size),
+            int(shelf_dimensions[2] // voxel_size)
+        )
+    total_voxels: int = grid_dimension[0] * grid_dimension[1] * grid_dimension[2]
+    total_volume: float = total_voxels * (voxel_size ** 3)
+    voxel_grid: np.ndarray = np.zeros(grid_dimension, dtype=np.int8)
 
     ## - Initialization
     def __init__(self, 
                  shelf_id: str,
-                 dimensions: tuple[float, float, float],
-                 voxel_size: float,
-                 access_cost: float, operational_cost: float = 0.0
+                 access_cost: float,
+                 operational_cost: float = 0.0
                  ):
 
         self.shelf_id: str = shelf_id
-        self.dimensions: tuple[float, float, float] = dimensions
-        self.voxel_size: float = voxel_size
+        self.voxel_size: float = Shelf.voxel_size
         self.stored_products: list[Product] = []
-        self.grid_dimension: tuple[int, int, int] = (
-            int(dimensions[0] // voxel_size),
-            int(dimensions[1] // voxel_size),
-            int(dimensions[2] // voxel_size)
-        )
-        self.total_voxels: int = self.grid_dimension[0] * self.grid_dimension[1] * self.grid_dimension[2]
-        self.total_volume: float = self.total_voxels * (voxel_size ** 3)
-        self.voxel_grid: np.ndarray = np.zeros(self.grid_dimension, dtype=np.int8)
         self.occupied_voxels_count: int = 0
 
         self.access_cost: float = access_cost
@@ -36,14 +38,19 @@ class Shelf:
         return self.shelf_id == value.shelf_id
     
     def __hash__(self):
-        
         return hash(self.shelf_id)
+    
+    def __getitem__(self, index) -> Product:
+        return self.stored_products[index]
+    
+    def __str__(self):
+        return f"Shelf id: {self.shelf_id}"
 
     ## - Methods
     def find_placement_position(self, product_voxel_dims: tuple[int, int, int]) -> tuple[int, int, int] | None:
 
         px, py, pz = product_voxel_dims
-        gx, gy, gz = self.grid_dimension
+        gx, gy, gz = Shelf.grid_dimension
 
         for z in range(gz - pz + 1):
             for y in range(gy - py + 1):
@@ -86,7 +93,6 @@ class Shelf:
     def remove_product(self, product: Product) -> bool:
 
         if product not in self.stored_products or product.position is None or product.orientation is None:
-
             return False
         
         x, y, z = product.position
@@ -113,18 +119,3 @@ class Shelf:
         self.stored_products = []
         self.voxel_grid.fill(0)
         self.occupied_voxels_count = 0
-
-    def visualize(self) -> None:
-        
-        if self.grid_dimension[2] > 0:
-
-            print(f"Shelf: {self.shelf_id}, Voxel Grid ({self.grid_dimension})")
-            print("Bottom Layer (z = 0):")
-
-            slice_2d = self.voxel_grid[:, :, 0]
-            print(slice_2d)
-
-            print(f"Occupied Voxels: {self.occupied_voxels_count} / {self.total_voxels}")
-            
-        else:
-            print(f"Shelf: {self.shelf_id} has zero height grid.")

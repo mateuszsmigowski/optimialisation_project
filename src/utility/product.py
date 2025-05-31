@@ -32,6 +32,10 @@ class Product:
         
         return hash(self.product_id)
     
+    def __str__(self):
+        
+        return f"Product id: {self.product_id}"
+    
     def dims_in_voxels(self) -> tuple[int, int, int]:
 
         return (
