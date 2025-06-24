@@ -30,12 +30,17 @@ def run_and_report(algorithm, racks, batches, removals, visualizer, run_name: st
 def main() -> None:
 
     # 1. Konfiguracja symulacji
-    NUM_EPOCHS = 5
-    PRODUCTS_PER_EPOCH = 25
+    NUM_EPOCHS = 3
+    PRODUCTS_PER_EPOCH = 150
+    NUM_RACKS = 10
+    NUM_SHELVES = 3
 
     # 2. Inicjalizacja komponentów
     voxel_size = Shelf.voxel_size
-    warehouse_factory = WarehouseFactory() 
+    warehouse_factory = WarehouseFactory(
+        rack_count=NUM_RACKS,
+        shelf_count=NUM_SHELVES
+    ) 
     batch_factory = BatchFactory(voxel_size=voxel_size)
     
     # 3. Wygeneruj jeden, spójny scenariusz dla wszystkich algorytmów

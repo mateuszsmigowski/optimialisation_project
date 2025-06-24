@@ -3,7 +3,7 @@ from utility.product import Product
 
 class Rack:
     
-    def __init__(self, rack_id: str, max_shelves: int = 6):
+    def __init__(self, rack_id: str, max_shelves: int = 4):
         
         self.rack_id: str = rack_id
         self.max_shelves: int = max_shelves

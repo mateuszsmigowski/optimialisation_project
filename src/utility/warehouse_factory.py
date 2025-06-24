@@ -3,14 +3,16 @@ from utility.rack import Rack
 
 class WarehouseFactory():
     
-    def __init__(self):
-        pass
+    def __init__(self, rack_count: int = 10, shelf_count: int = 4):
+        
+        self.rack_count = rack_count
+        self.shelf_count = shelf_count
     
     def make_racks(self):
 
         racks: list[Rack] = []
         
-        for i in range(0,2):
+        for i in range(0, self.rack_count):
             rack = self.__make_rack(rack_index=i)
             racks.append(rack)
         
@@ -20,12 +22,12 @@ class WarehouseFactory():
         
         rack = Rack(f"R{rack_index}")
         
-        for i in range(0,6):
+        for i in range(0, self.shelf_count):
             shelf = self.__make_shelf(
                 rack_index=rack_index,
                 shelf_index=i,
-                access_cost=rack_index+1,
-                additional_cost=i+1
+                access_cost=(rack_index+1)*100,
+                additional_cost=(i+1)*10
                 )
             rack.add_shelf(shelf)
             
