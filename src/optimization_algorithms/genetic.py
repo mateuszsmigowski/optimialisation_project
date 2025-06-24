@@ -50,10 +50,18 @@ class GeneticOptimizer(Optimizer):
             
         # 5. Po zakończeniu ewolucji, zastosuj najlepsze znalezione rozwiązanie do PRAWDZIWYCH półek
         print(f"  > Evolution finished. Best cost for this batch: {self._best_cost:.2f}")
+        unplaced_products: list[Product] = []
         if self.best_solution_ever:
-            self._evaluate_individual(self.best_solution_ever, batch, all_shelves, apply_placement=True)
+            _cost, unplaced_products = self._evaluate_individual(
+                self.best_solution_ever, batch, all_shelves, apply_placement=True
+            )
+            if unplaced_products:
+                print(f"  > Could not place {len(unplaced_products)} products. They will be carried over.")
         else:
-            print("  > No valid solution found for this batch.")
+            print("  > No valid solution found for this batch. All products carried over.")
+            unplaced_products = batch[:]
+
+        return unplaced_products
 
     def _initialize_population(self, num_products: int, num_shelves: int) -> list[list[int]]:
         """Tworzy losową populację początkową."""
@@ -96,14 +104,14 @@ class GeneticOptimizer(Optimizer):
 
     def _calculate_fitness(self, individual: list[int], batch: list[Product], original_shelves: list[Shelf]) -> float:
         """Oblicza wartość fitness dla danego osobnika (rozwiązania)."""
-        cost, unplaced_count = self._evaluate_individual(individual, batch, original_shelves)
-        
+        cost, unplaced_list = self._evaluate_individual(individual, batch, original_shelves)
+        unplaced_count = len(unplaced_list)
         penalty = unplaced_count * 1_000_000 
         total_cost = cost + penalty
         
         return 1.0 / (1.0 + total_cost)
 
-    def _evaluate_individual(self, individual: list[int], batch: list[Product], original_shelves: list[Shelf], apply_placement: bool = False) -> tuple[float, int]:
+    def _evaluate_individual(self, individual: list[int], batch: list[Product], original_shelves: list[Shelf], apply_placement: bool = False) -> tuple[float, list[Product]]:
         """
         Symuluje umieszczanie produktów i oblicza koszt.
         """
@@ -114,7 +122,7 @@ class GeneticOptimizer(Optimizer):
             shelves_to_use = copy.deepcopy(original_shelves)
 
         total_cost = 0.0
-        unplaced_products = 0
+        unplaced_products_list: list[Product] = []
 
         sorted_indices = sorted(range(len(batch)), key=lambda i: batch[i].volume, reverse=True)
 
@@ -126,9 +134,9 @@ class GeneticOptimizer(Optimizer):
             if shelf.place_product(product):
                 total_cost += product.frequency * (shelf.access_cost + shelf.operational_cost)
             else:
-                unplaced_products += 1
+                unplaced_products_list.append(product)
         
-        return total_cost, unplaced_products
+        return total_cost, unplaced_products_list
 
     @property
     def cost(self) -> float:

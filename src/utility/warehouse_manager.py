@@ -9,59 +9,70 @@ class WarehouseManager:
     def __init__(self, racks: list[Rack]):
         self.racks: list[Rack] = racks
         self.total_cost_incurred = 0.0
+        self.pending_products: list[Product] = []
 
-    def start_simulation(self, algorithm: Optimizer, batches: list[list[Product]]):
-        """Uruchamia pełną symulację na podstawie pre-generowanych partii."""
+    # Zmieniona sygnatura - przyjmuje teraz `removal_decisions`
+    def start_simulation(self, algorithm: Optimizer, batches: list[list[Product]], removal_decisions: list[list[str]]):
         num_epochs = len(batches)
         print(f"--- Starting Warehouse Simulation for {num_epochs} epochs using {algorithm.__class__.__name__} ---")
         
         for epoch, new_batch in enumerate(batches, 1):
             print(f"\n===== EPOCH {epoch}/{num_epochs} =====")
             
-            # 1. Faza usuwania produktów
-            self._remove_departing_products()
+            ids_to_remove = removal_decisions[epoch - 1]
+            self._remove_departing_products(ids_to_remove)
             
-            # 2. Faza dostawy nowych produktów (już dostarczona w argumencie)
-            print(f"Processing pre-generated batch {epoch} with {len(new_batch)} products.")
+            # Łączymy nowe produkty z tymi, które czekały w kolejce
+            batch_to_process = self.pending_products + new_batch
+            print(f"Processing batch of {len(batch_to_process)} products ({len(self.pending_products)} carried over, {len(new_batch)} new).")
+            
+            # Czyścimy kolejkę przed uruchomieniem algorytmu
+            self.pending_products = []
 
-            # 3. Faza optymalizacji i umieszczania
-            if new_batch:
-                algorithm.solve(batch=new_batch, racks=self.racks)
+            if batch_to_process:
+                # Algorytm zwraca produkty, które się nie zmieściły
+                unplaced = algorithm.solve(batch=batch_to_process, racks=self.racks)
+                # Zapisujemy je do kolejki na następną epokę
+                self.pending_products = unplaced
+                
                 self.total_cost_incurred += algorithm.cost
             
-            # 4. Statystyki po epoce
             self.print_epoch_summary()
 
         print("\n--- Simulation Finished ---")
+        if self.pending_products:
+            print(f"Warning: {len(self.pending_products)} products remained unplaced after the final epoch.")
         print(f"Total cumulative cost for {algorithm.__class__.__name__}: {self.total_cost_incurred:.2f}")
 
-    def _remove_departing_products(self, base_removal_chance: float = 0.1):
+    # Metoda została całkowicie zmieniona
+    def _remove_departing_products(self, products_to_remove_ids: list[str]):
         """
-        Usuwa produkty z magazynu na podstawie ich częstotliwości.
-        Produkty o wyższej częstotliwości mają większą szansę na usunięcie.
+        Usuwa z magazynu produkty o podanych ID.
         """
-        products_to_remove = []
-        all_stored_products = [prod for rack in self.racks for shelf in rack.shelves for prod in shelf.stored_products]
-        
-        if not all_stored_products:
-            print("Warehouse is empty. No products to remove.")
+        if not products_to_remove_ids:
+            print("No products designated for removal in this epoch.")
             return
 
-        max_freq = max(p.frequency for p in all_stored_products) if all_stored_products else 1
+        print(f"Attempting to remove {len(products_to_remove_ids)} designated products...")
         
-        for product in all_stored_products:
-            removal_probability = base_removal_chance + (product.frequency / max_freq) * 0.5
-            if random.random() < removal_probability:
-                products_to_remove.append(product)
+        # Stworzenie mapy dla szybkiego dostępu do produktów po ID
+        product_map = {
+            prod.product_id: prod
+            for rack in self.racks 
+            for shelf in rack.shelves 
+            for prod in shelf.stored_products
+        }
         
-        print(f"Attempting to remove {len(products_to_remove)} products...")
         count = 0
-        for product in products_to_remove:
-            if product.assigned_shelf:
-                product.assigned_shelf.remove_product(product)
+        for product_id in products_to_remove_ids:
+            product_to_remove = product_map.get(product_id)
+            if product_to_remove and product_to_remove.assigned_shelf:
+                product_to_remove.assigned_shelf.remove_product(product_to_remove)
                 count += 1
+                
         print(f"Successfully removed {count} products.")
-
+    
+    # ... print_epoch_summary bez zmian ...
     def print_epoch_summary(self):
         """Wyświetla podsumowanie stanu magazynu."""
         total_products = 0

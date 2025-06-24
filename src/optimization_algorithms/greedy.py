@@ -31,7 +31,7 @@ class GreedyOptimizer(Optimizer):
         
         sorted_shelves = sorted(all_shelves, key=lambda s: s.access_cost + s.operational_cost)
         
-        unplaced_products_count = 0
+        unplaced_products: list[Product] = []
         print(f"  > Starting Greedy Optimizer for new batch of {len(batch)} products.")
 
         for product in sorted_products:
@@ -46,11 +46,13 @@ class GreedyOptimizer(Optimizer):
                     break
             
             if not placed:
-                unplaced_products_count += 1
+                unplaced_products.append(product)
 
         print(f"  > Greedy Optimizer finished. Cost for this batch: {self.cost:.2f}")
-        if unplaced_products_count > 0:
-            print(f"  > Could not place {unplaced_products_count} products.")
+        if unplaced_products:
+            print(f"  > Could not place {len(unplaced_products)} products. They will be carried over.")
+            
+        return unplaced_products
 
     @property
     def cost(self) -> float:
