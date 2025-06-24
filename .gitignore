@@ -1,0 +1,92 @@
+# --- Ogólne Ignorowane Pliki ---
+.DS_Store             # Pliki macOS
+Thumbs.db             # Pliki Windows
+
+# --- Pliki Pythona ---
+*.pyc                 # Skompilowane pliki bytecode
+__pycache__/          # Katalogi cache Pythona
+*.orig                # Pliki tworzone przez niektóre edytory/narzędzia (np. mergetool)
+*.bak                 # Pliki backup
+*.swp                 # Pliki wymiany Vim
+*~                    # Pliki backup Emacs
+
+# --- Środowiska Wirtualne ---
+# Jeśli używasz venv:
+/venv
+/env
+# Jeśli używasz pipenv:
+.venv/
+# Jeśli używasz poetry:
+# .venv jest zazwyczaj tworzony poza katalogiem projektu,
+# ale jeśli jest w środku, możesz dodać:
+# .venv/
+
+# Jeśli środowisko wirtualne jest tworzone w konkretnej lokalizacji, np. w katalogu domowym:
+# Jeśli używasz direnv, możesz chcieć ignorować pliki .envrc
+#.envrc
+
+# --- Pliki Danych i Dzienników ---
+*.log                 # Pliki logów
+*.sqlite3             # Bazy danych SQLite
+*.db                  # Ogólne pliki baz danych (rozważ, jeśli masz inne pliki .db, które powinny być śledzone)
+
+# --- Pliki Zarządzania Pakietami ---
+# Pliki generowane przez pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Jeśli używasz poetry i generujesz pliki lock, które nie są śledzone
+# poetry.lock           # Zwykle śledzony, ale możesz zignorować, jeśli zarządzasz zależnościami inaczej
+
+# Jeśli używasz narzędzi do budowania dystrybucji
+dist/                 # Katalog dystrybucji (np. dla wheel, sdist)
+build/                # Katalog budowy
+*.egg-info/           # Metadane pakietów (np. dla setuptools)
+.eggs/                # Katalogi jaj
+
+# --- Pliki Specyficzne dla IDE/Edytorów ---
+
+# PyCharm
+.idea/                # Konfiguracja projektu PyCharm
+*.iml                 # Pliki modułów IntelliJ
+
+# VS Code
+.vscode/              # Konfiguracja projektu VS Code
+# Jeśli masz pliki, które zawierają wrażliwe dane lub są specyficzne dla użytkownika, np. launch.json:
+# .vscode/launch.json
+# .vscode/settings.json
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+.atom/
+
+# Eclipse
+.project
+.pydevproject
+.settings/
+bin/
+
+# Jupyter Notebook
+.ipynb_checkpoints/   # Checkpointy notebooków
+
+# --- Pliki Testowe i Raporty ---
+.pytest_cache/        # Cache pytest
+.coverage             # Pliki pokrycia kodu
+
+# --- Pliki Konfiguracji Użytkownika (opcjonalne) ---
+# Jeśli masz pliki konfiguracyjne, które są generowane przez użytkownika i nie powinny być w repozytorium:
+# config.ini
+# settings.py           # Często zawiera wrażliwe dane, jeśli nie jest zarządzane przez środowisko
+# local_settings.py     # Typowe dla projektów Django
+
+# --- Pliki Kontenerów (opcjonalne) ---
+# Jeśli budujesz obrazy Docker
+Dockerfile.bak
+*.container
+
+# --- Inne Ogólne Pliki ---
+.env                  # Pliki ze zmiennymi środowiskowymi (zawsze ignoruj!)
+.DS_Store

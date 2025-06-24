@@ -15,6 +15,10 @@ class Rack:
     def __str__(self):
         return f"Rack id: {self.rack_id}"
         
+    @property
+    def get_products_count(self) -> int:
+        return sum(shelf.get_products_count for shelf in self.shelves)
+        
     def add_shelf(self, shelf: Shelf) -> bool:
         
         if len(self.shelves) < self.max_shelves:

@@ -1,7 +1,7 @@
 from utility.shelf import Shelf
 from utility.rack import Rack
 
-class Warehouse_Factory():
+class WarehouseFactory():
     
     def __init__(self):
         pass
@@ -24,8 +24,8 @@ class Warehouse_Factory():
             shelf = self.__make_shelf(
                 rack_index=rack_index,
                 shelf_index=i,
-                access_cost=rack_index,
-                additional_cost=i
+                access_cost=rack_index+1,
+                additional_cost=i+1
                 )
             rack.add_shelf(shelf)
             

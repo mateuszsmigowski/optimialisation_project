@@ -13,7 +13,6 @@ class Shelf:
         )
     total_voxels: int = grid_dimension[0] * grid_dimension[1] * grid_dimension[2]
     total_volume: float = total_voxels * (voxel_size ** 3)
-    voxel_grid: np.ndarray = np.zeros(grid_dimension, dtype=np.int8)
 
     ## - Initialization
     def __init__(self, 
@@ -23,6 +22,7 @@ class Shelf:
                  ):
 
         self.shelf_id: str = shelf_id
+        self.voxel_grid: np.ndarray = np.zeros(Shelf.grid_dimension, dtype=np.int8)
         self.voxel_size: float = Shelf.voxel_size
         self.stored_products: list[Product] = []
         self.occupied_voxels_count: int = 0
@@ -45,6 +45,10 @@ class Shelf:
     
     def __str__(self):
         return f"Shelf id: {self.shelf_id}"
+    
+    @property
+    def get_products_count(self) -> int:
+        return len(self.stored_products)
 
     ## - Methods
     def find_placement_position(self, product_voxel_dims: tuple[int, int, int]) -> tuple[int, int, int] | None:
@@ -85,6 +89,7 @@ class Shelf:
             product.assigned_shelf = self
             product.position = placement_position
             product.orientation = tuple(dim * self.voxel_size for dim in current_orientation_dims)
+            product.voxel_dims = current_orientation_dims
 
             return True
         
@@ -96,11 +101,7 @@ class Shelf:
             return False
         
         x, y, z = product.position
-        ox, oy, oz = (
-            int(round(product.orientation[0] / self.voxel_size)),
-            int(round(product.orientation[1] / self.voxel_size)),
-            int(round(product.orientation[2] / self.voxel_size))
-        )
+        ox, oy, oz = product.voxel_dims
 
         self.voxel_grid[x:x+ox, y:y+oy, z:z+oz] = 0
 

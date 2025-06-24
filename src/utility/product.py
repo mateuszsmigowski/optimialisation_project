@@ -18,6 +18,7 @@ class Product:
         self.volume: float = dimensions[0] * dimensions[1] * dimensions[2]
         self.assigned_shelf: Shelf | None = None
         self.voxel_size = voxel_size
+        self.voxel_dims: tuple[int, int, int] | None = None
 
         self.position: tuple[int, int, int] | None = None
         self.orientation: tuple[int, int, int] | None = None
